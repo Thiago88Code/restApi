@@ -4,12 +4,14 @@ export type User = {
     id: number
     name: string
     password: string
+    logged: number
+    
 }
 
 const insertUser = async (user: User) =>{
-   await dbQuery('INSERT INTO users (name,password) VALUES(?,?)', [user.name, user.password])
+   await dbQuery('INSERT INTO users (name,password,logged) VALUES(?,?,?)', [user.name, user.password, user.logged])
     const response = await dbQuery(`SELECT * FROM users WHERE id = ?`, [user.id])
-    return getUser(response[0].id);
+    return response[0].id;
     
 }
 
@@ -18,7 +20,7 @@ const updateUser = async (user: User) =>{
     await dbQuery('UPDATE users SET name = ?, password = ? WHERE id = ?', [user.name, user.password, user.id])
      return getUser(user.id);
      
- }
+}
 
 const listUsers = async () =>{
     const response = await dbQuery(`SELECT * FROM users`, [])
@@ -38,9 +40,9 @@ const deleteUser = async (id:number) => {
 
 
 const getLogin = async (user:User) => {
-    const response = await dbQuery(`SELECT * FROM users WHERE name = ?`, [user.name])
-    //return response as User[];
-    
+    const response = await dbQuery(`SELECT name FROM users WHERE name = ? AND password = ? AND id = ?`, [user.name, user.password, user.id])
+    return response[0].id;
+
 }
 
 

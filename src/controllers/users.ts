@@ -42,7 +42,6 @@ const getUser = (req: Request, res:Response) =>{
     
     const id = parseInt(req.params.id);
 
-    
     userModel.getUser(id)
     .then((users)=>{
         res.json({
@@ -102,9 +101,11 @@ const updateUser = async (req: Request, res: Response) =>{
 const getLogin = (req: Request, res: Response) =>{
     
     userModel.getLogin(req.body)
+
+        
         .then((users)=>{
             res.json({
-                users
+                getLogin: "login ok"
             })
         })
         .catch(err => internalServerError(res, err))
