@@ -1,111 +1,181 @@
-import {Request, Response} from "express"
+import { Request, Response } from "express"
 import { userModel } from "../models/users";
 import { badrequest, internalServerError } from "../services/util";
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
 
-const insertUser = (req: Request, res: Response) =>{
+const insertUser = async (req: Request, res: Response) => {
 
-    {
+    {   //Empty field validation
         const user = req.body;
-        if(!user)
-        return badrequest(res, "invalid user")
+        if (!user)
+            return badrequest(res, "invalid user")
 
-        if(!user.name)
-        return badrequest(res, "invalid name")
+        if (!user.name)
+            return badrequest(res, "invalid name")
 
-        if(!user.password)
-        return badrequest(res, "invalid password")
+        if (!user.password)
+            return badrequest(res, "invalid password")
 
     }
+    //generating password hash
+    let bcryptPassword = await bcrypt.hash(req.body.password, 10)
 
-        userModel.insertUser(req.body)
-        .then(()=>{
+    let body = req.body
+
+    //assigning password hash to req.body
+    body = {
+        id: req.body.id,
+        name: req.body.name,
+        password: bcryptPassword,
+        logged: req.body.logged
+    }
+
+    await userModel.insertUser(body)
+
+        .then((user) => {
             res.json({
-                postResponse: req.body
+                newUser: user
             })
         })
         .catch(err => internalServerError(res, err))
 }
 
 
-const listUsers = (req: Request, res:Response) =>{
-        userModel.listUsers()
-        .then((users)=>{
+const listUsers = async (req: Request, res: Response) => {
+    await userModel.listUsers()
+        .then((users) => {
             res.json({
                 users
             })
+
         })
         .catch(err => internalServerError(res, err))
 }
 
 
-const getUser = (req: Request, res:Response) =>{
-    
+const getUser = (req: Request, res: Response) => {
+
+    //Verifing if the id comes inside req.param
     const id = parseInt(req.params.id);
 
     userModel.getUser(id)
-    .then((users)=>{
-        res.json({
-                users
-        })
-    })
-    .catch(err => internalServerError(res, err))
-}
-
-
-const deleteUser = (req: Request, res:Response) =>{
-    
-    const id = parseInt(req.params.id);
-    userModel.deleteUser(id)
-    .then(()=>{
-       res.json({
-        res: "deleted"
-       })
-    })
-    .catch(err => internalServerError(res, err))
-}
-
-
-
-const updateUser = async (req: Request, res: Response) =>{
-    const id = parseInt(req.params.id);
-
-    {
-        const user = req.body;
-        if(!user)
-        return badrequest(res, "invalid user")
-
-        if(!user.name)
-        return badrequest(res, "invalid name")
-
-        if(!user.password)
-        return badrequest(res, "invalid password")
-
-       const userSaved = await userModel.getUser(id)
-            if(!userSaved)
-       return (res: Response, err:string) =>{
-        res.status(400).json({
-            err
-        })
-    }}
-
-
-    userModel.updateUser(req.body)
-        .then((users)=>{
+        .then((users) => {
             res.json({
-                updateResponse: req.body
+                users
             })
         })
         .catch(err => internalServerError(res, err))
 }
 
-const getLogin = (req: Request, res: Response) =>{
-    
-    userModel.getLogin(req.body)
 
-        
-        .then((users)=>{
+const deleteUser = (req: Request, res: Response) => {
+
+    const id = parseInt(req.params.id);
+
+    userModel.deleteUser(id)
+        .then(() => {
             res.json({
-                getLogin: "login ok"
+                res: "User Deleted"
+            })
+        })
+        .catch(err => internalServerError(res, err))
+}
+
+const updateUser = async (req: Request, res: Response) => {
+
+    //Verifing if the id comes inside req.param
+    //const id = parseInt(req.params.id);
+
+    {   //Empty field validation
+        const user = req.body;
+        if (!user)
+            return badrequest(res, "invalid user")
+
+        if (!user.name)
+            return badrequest(res, "invalid name")
+
+        if (!user.password)
+            return badrequest(res, "invalid password")
+
+    }
+    //generating password hash
+    let bcryptPassword = await bcrypt.hash(req.body.password, 10)
+
+    let body = req.body
+
+    //assigning password hash to req.body
+    body = {
+        id: req.body.id,
+        name: req.body.name,
+        password: bcryptPassword,
+        logged: req.body.logged
+    }
+    await userModel.updateUser(body)
+        .then((users) => {
+            res.json({
+                updateResponse: users
+            })
+        })
+        .catch(err => internalServerError(res, err))
+}
+
+const login = async (req: Request, res: Response) => {
+
+    {  //Empty field validation
+        if (!req.body.name)
+            return badrequest(res, "invalid user")
+
+        if (!req.body.password)
+            return badrequest(res, "invalid name")
+    }
+    //Calling the login function from model
+    const userLogin = await userModel.login(req.body)
+
+        .then(async (user) => {
+
+            //Verifing encripted password
+            //CheckPass returns true or false
+            const checkPass = await bcrypt.compare(req.body.password, user.password)
+            console.log(checkPass)
+
+            if (!checkPass) {
+                return badrequest(res, "invalid password");
+            }
+            //Generating token
+            const token = jwt.sign({ id: req.body.id }, process.env.JWT_PASS ?? "", { expiresIn: '8h' });
+            res.json({
+                user,
+                token
+            });
+        })
+        .catch(err => internalServerError(res, err))
+
+}
+
+const getProfile = (req: Request, res: Response) => {
+
+    //Calling the getProfile function from model
+    userModel.getProfile(req.body)
+        .then((user) => {
+
+            //Verifing if the token comes inside headers.authorization
+            const authorization = req.headers.authorization
+
+            if (!authorization) {
+                throw new Error("nao autorizado");
+            }
+
+            //Spliting Bearer Token
+            const token = authorization.split(' ')[1]
+            //JWT
+            const verifiedToken = jwt.verify(token, process.env.JWT_PASS ?? "")
+
+            res.json({
+                login: {
+                    user,
+                    verifiedToken
+                }
             })
         })
         .catch(err => internalServerError(res, err))
@@ -117,7 +187,8 @@ export const userController = {
     getUser,
     deleteUser,
     updateUser,
-    getLogin
-    
+    login,
+    getProfile
+
 
 }

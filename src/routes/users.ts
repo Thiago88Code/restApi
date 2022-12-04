@@ -7,11 +7,13 @@ userRouter.post('/', userController.insertUser);
 userRouter.get('/', userController.listUsers);
 userRouter.get('/:id', userController.getUser);
 userRouter.delete('/:id', userController.deleteUser);
-userRouter.put('/:id', userController.updateUser);
-userRouter.get('/login/login', userController.getLogin);
+userRouter.put('/', userController.updateUser);
+
+userRouter.post('/login', userController.login);
+userRouter.get('/login/profile', userController.getProfile);
 
 export {
     userRouter,
-    
+
 
 }
