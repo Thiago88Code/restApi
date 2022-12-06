@@ -10,10 +10,17 @@ export type User = {
 
 const insertUser = async (user: User) => {
     await dbQuery('INSERT INTO users (name,password,logged) VALUES(?,?,?)', [user.name, user.password, user.logged])
-    const response = await dbQuery(`SELECT * FROM users WHERE name = ? A password = ?`, [user.name, user.id])
+    const response = await dbQuery(`SELECT * FROM users WHERE name = ? AND password = ?`, [user.name, user.password])
     return response[0];
 
 }
+
+const insertToken = async (userId: number, token: string) => {
+    const response = await dbQuery('INSERT INTO blacklist (userId,token) VALUES(?,?)', [userId, token])
+    return response[0];
+
+}
+
 
 const updateUser = async (user: User) => {
     await dbQuery('UPDATE users SET name = ?, password = ? WHERE id = ?', [user.name, user.password, user.id])
@@ -43,10 +50,25 @@ const login = async (user: User) => {
     return response[0];
 }
 
-const getProfile = async (user: User) => {
-    const response = await dbQuery(`SELECT * FROM users WHERE id = ?`, [user.id])
+const logout = async (id: number) => {
+    const response = await dbQuery(`DELETE FROM blacklist WHERE userId = ?`, [id])
     return response as User[];
 }
+
+const getProfile = async (user: User) => {
+    const res = await dbQuery(`SELECT * FROM blacklist WHERE userId = ?`, [user.id])
+    if(res.length < 1){
+        const notFound: string[] = ["Token not found"]
+        return notFound
+    }else{
+        const response = await dbQuery(`SELECT * FROM users WHERE id = ?`, [user.id])
+        return response as User[];
+    }
+       
+    }
+    
+   
+
 
 export const userModel = {
     insertUser,
@@ -55,5 +77,7 @@ export const userModel = {
     deleteUser,
     updateUser,
     login,
-    getProfile
+    logout,
+    getProfile,
+    insertToken
 }

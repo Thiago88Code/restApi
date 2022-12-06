@@ -130,7 +130,7 @@ const login = async (req: Request, res: Response) => {
             return badrequest(res, "invalid name")
     }
     //Calling the login function from model
-    const userLogin = await userModel.login(req.body)
+    await userModel.login(req.body)
 
         .then(async (user) => {
 
@@ -144,14 +144,31 @@ const login = async (req: Request, res: Response) => {
             }
             //Generating token
             const token = jwt.sign({ id: req.body.id }, process.env.JWT_PASS ?? "", { expiresIn: '8h' });
+            //Saving the token in the blacklist
+            userModel.insertToken(req.body.id, token)
             res.json({
                 user,
                 token
             });
+
         })
+
         .catch(err => internalServerError(res, err))
 
 }
+
+const logout = (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    //Deleting the token in the blacklist
+    userModel.logout(id)
+        .then(() => {
+            res.json({
+                res: "Deleted Token"
+            })
+        })
+        .catch(err => internalServerError(res, err))
+}
+
 
 const getProfile = (req: Request, res: Response) => {
 
@@ -173,8 +190,8 @@ const getProfile = (req: Request, res: Response) => {
 
             res.json({
                 login: {
-                    user,
-                    verifiedToken
+                    user
+                    
                 }
             })
         })
@@ -188,6 +205,7 @@ export const userController = {
     deleteUser,
     updateUser,
     login,
+    logout,
     getProfile
 
 
