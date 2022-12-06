@@ -9,7 +9,8 @@ useRoutes(app)
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', (req, res) => {
-    res.json({ msg: "ok" })
+    res.status(401).json({ msg: "ok" })
+    
 })
 
 export {app}
