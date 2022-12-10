@@ -57,18 +57,15 @@ const logout = async (id: number) => {
 
 const getProfile = async (user: User) => {
     const res = await dbQuery(`SELECT * FROM blacklist WHERE userId = ?`, [user.id])
-    if(res.length < 1){
+    if (res.length < 1) {
         const notFound: string[] = ["Token not found"]
         return notFound
-    }else{
+    } else {
         const response = await dbQuery(`SELECT * FROM users WHERE id = ?`, [user.id])
         return response as User[];
     }
-       
-    }
-    
-   
 
+}
 
 export const userModel = {
     insertUser,

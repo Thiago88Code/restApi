@@ -1,10 +1,12 @@
 import sqlite3 from "sqlite3";
 
+//environment variable
 const DATABASE_FILE = process.env.DATABASE_FILE;
 
 if (!DATABASE_FILE)
     throw new Error("DATABASE_FILE not exists");
 
+//sqlite instance
 export const openConnection = () => {
     return new sqlite3.Database(DATABASE_FILE);
     

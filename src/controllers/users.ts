@@ -4,20 +4,34 @@ import { badrequest, internalServerError } from "../services/util";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
-const insertUser = async (req: Request, res: Response) => {
+
+interface IUser {
+    id: number
+    name: string
+    password: string
+    logged: number
+
+}
+
+const insertUser = async (req: Request<{}, {}, IUser>, res: Response) => {
 
     {   //Empty field validation
         const user = req.body;
-        if (!user)
-            return badrequest(res, "invalid user")
+
 
         if (!user.name)
-            return badrequest(res, "invalid name")
+            return badrequest(res, "Empty name")
 
         if (!user.password)
-            return badrequest(res, "invalid password")
+            return badrequest(res, "Empty password")
+
+        if (!user.logged)
+            return badrequest(res, "Empty logged")
+
 
     }
+
+
     //generating password hash
     let bcryptPassword = await bcrypt.hash(req.body.password, 10)
 
@@ -30,12 +44,12 @@ const insertUser = async (req: Request, res: Response) => {
         password: bcryptPassword,
         logged: req.body.logged
     }
-
+    
     await userModel.insertUser(body)
 
         .then((user) => {
-            res.json({
-                newUser: user
+            res.status(201).json({
+                user
             })
         })
         .catch(err => internalServerError(res, err))
@@ -48,7 +62,6 @@ const listUsers = async (req: Request, res: Response) => {
             res.json({
                 users
             })
-
         })
         .catch(err => internalServerError(res, err))
 }
@@ -68,11 +81,9 @@ const getUser = (req: Request, res: Response) => {
         .catch(err => internalServerError(res, err))
 }
 
-
 const deleteUser = (req: Request, res: Response) => {
 
     const id = parseInt(req.params.id);
-
     userModel.deleteUser(id)
         .then(() => {
             res.json({
@@ -82,7 +93,7 @@ const deleteUser = (req: Request, res: Response) => {
         .catch(err => internalServerError(res, err))
 }
 
-const updateUser = async (req: Request, res: Response) => {
+const updateUser = async (req: Request<{}, {}, IUser>, res: Response) => {
 
     //Verifing if the id comes inside req.param
     //const id = parseInt(req.params.id);
@@ -111,14 +122,18 @@ const updateUser = async (req: Request, res: Response) => {
         password: bcryptPassword,
         logged: req.body.logged
     }
+    
     await userModel.updateUser(body)
+    
         .then((users) => {
             res.json({
                 updateResponse: users
             })
         })
+        
         .catch(err => internalServerError(res, err))
 }
+
 
 const login = async (req: Request, res: Response) => {
 
@@ -191,7 +206,7 @@ const getProfile = (req: Request, res: Response) => {
             res.json({
                 login: {
                     user
-                    
+
                 }
             })
         })
