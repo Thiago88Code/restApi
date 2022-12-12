@@ -4,12 +4,10 @@ export type User = {
     id: number
     name: string
     password: string
-    logged: number
-
 }
 
 const insertUser = async (user: User) => {
-    await dbQuery('INSERT INTO users (name,password,logged) VALUES(?,?,?)', [user.name, user.password, user.logged])
+    await dbQuery('INSERT INTO users (name, password) VALUES(?,?)', [user.name, user.password])
     const response = await dbQuery(`SELECT * FROM users WHERE name = ? AND password = ?`, [user.name, user.password])
     return response[0];
 
@@ -20,7 +18,6 @@ const insertToken = async (userId: number, token: string) => {
     return response[0];
 
 }
-
 
 const updateUser = async (user: User) => {
     await dbQuery('UPDATE users SET name = ?, password = ? WHERE id = ?', [user.name, user.password, user.id])
@@ -45,7 +42,6 @@ const deleteUser = async (id: number) => {
 }
 
 const login = async (user: User) => {
-
     const response = await dbQuery(`SELECT * FROM users WHERE name = ? AND id = ?`, [user.name, user.id])
     return response[0];
 }

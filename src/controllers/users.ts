@@ -9,27 +9,21 @@ interface IUser {
     id: number
     name: string
     password: string
-    logged: number
-
 }
 
-const insertUser = async (req: Request<{}, {}, IUser>, res: Response) => {
+const insertUser = async (req: Request, res: Response) => {
 
     {   //Empty field validation
         const user = req.body;
 
-
         if (!user.name)
             return badrequest(res, "Empty name")
-            
+
 
         if (!user.password)
             return badrequest(res, "Empty password")
 
-        if (!user.logged)
-            return badrequest(res, "Empty logged")
     }
-
 
     //generating password hash
     let bcryptPassword = await bcrypt.hash(req.body.password, 10)
@@ -40,8 +34,8 @@ const insertUser = async (req: Request<{}, {}, IUser>, res: Response) => {
     body = {
         id: req.body.id,
         name: req.body.name,
-        password: bcryptPassword,
-        logged: req.body.logged
+        password: bcryptPassword
+
     }
 
     await userModel.insertUser(body)
@@ -65,7 +59,6 @@ const listUsers = async (req: Request, res: Response) => {
         })
         .catch(err => internalServerError(res, err))
 }
-
 
 const getUser = (req: Request, res: Response) => {
 
@@ -121,8 +114,7 @@ const updateUser = async (req: Request<{}, {}, IUser>, res: Response) => {
     body = {
         id: req.body.id,
         name: req.body.name,
-        password: bcryptPassword,
-        logged: req.body.logged
+        password: bcryptPassword
     }
 
     await userModel.updateUser(body)
@@ -146,6 +138,8 @@ const login = async (req: Request, res: Response) => {
         if (!req.body.password)
             return badrequest(res, "invalid password")
     }
+
+
     //Calling the login function from model
     await userModel.login(req.body)
 
@@ -154,7 +148,6 @@ const login = async (req: Request, res: Response) => {
             //Verifing encripted password
             //CheckPass returns true or false
             const checkPass = await bcrypt.compare(req.body.password, user.password)
-            console.log(checkPass)
 
             if (!checkPass) {
                 return badrequest(res, "invalid password");
@@ -169,7 +162,6 @@ const login = async (req: Request, res: Response) => {
             });
 
         })
-
         .catch(err => internalServerError(res, err))
 
 }

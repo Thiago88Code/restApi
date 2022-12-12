@@ -6,9 +6,9 @@ describe("userController.updatetUser()", () => {
         const response = await request(app)
             .put("/api/v1/user")
             .send({
-                id: 4,
-                name: "NameTest",
-                password: "NameTest",
+                id: 3,
+                name: "Updated_NameTest",
+                password: "Updated_NameTest",
                 logged: 1
             })
 
@@ -22,7 +22,7 @@ describe("userController.updatetUser()", () => {
         const response = await request(app)
             .post("/api/v1/user")
             .send({
-                id: 1,
+                id: 3,
                 name: "",
                 password: "",
                 logged: 1

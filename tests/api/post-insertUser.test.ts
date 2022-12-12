@@ -8,13 +8,13 @@ describe("userController.insertUser()", () => {
             .send({
                 id: 1,
                 name: "NameTest",
-                password: "NameTest",
+                password: "PasswordTest",
                 logged: 1
             })
 
         expect(response.status).toBe(201)
         expect(response.body).toHaveProperty('user')
-        console.log(response.body)
+        console.log(response.body.name)
     
     })
 
