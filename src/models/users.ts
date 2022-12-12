@@ -16,7 +16,7 @@ const insertUser = async (user: User) => {
 }
 
 const insertToken = async (userId: number, token: string) => {
-    const response = await dbQuery('INSERT INTO blacklist (userId,token) VALUES(?,?)', [userId, token])
+    const response = await dbQuery('INSERT INTO blacklist (userId, token) VALUES(?,?)', [userId, token])
     return response[0];
 
 }

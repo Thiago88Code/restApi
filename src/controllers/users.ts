@@ -21,14 +21,13 @@ const insertUser = async (req: Request<{}, {}, IUser>, res: Response) => {
 
         if (!user.name)
             return badrequest(res, "Empty name")
+            
 
         if (!user.password)
             return badrequest(res, "Empty password")
 
         if (!user.logged)
             return badrequest(res, "Empty logged")
-
-
     }
 
 
@@ -44,11 +43,12 @@ const insertUser = async (req: Request<{}, {}, IUser>, res: Response) => {
         password: bcryptPassword,
         logged: req.body.logged
     }
-    
+
     await userModel.insertUser(body)
 
         .then((user) => {
-            res.status(201).json({
+            res.status(201)
+            res.json({
                 user
             })
         })
@@ -73,9 +73,9 @@ const getUser = (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
 
     userModel.getUser(id)
-        .then((users) => {
+        .then((user) => {
             res.json({
-                users
+                user
             })
         })
         .catch(err => internalServerError(res, err))
@@ -83,11 +83,13 @@ const getUser = (req: Request, res: Response) => {
 
 const deleteUser = (req: Request, res: Response) => {
 
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id)
+
     userModel.deleteUser(id)
-        .then(() => {
+        .then((user) => {
             res.json({
-                res: "User Deleted"
+                res: "User Deleted",
+                user
             })
         })
         .catch(err => internalServerError(res, err))
@@ -122,15 +124,15 @@ const updateUser = async (req: Request<{}, {}, IUser>, res: Response) => {
         password: bcryptPassword,
         logged: req.body.logged
     }
-    
+
     await userModel.updateUser(body)
-    
-        .then((users) => {
+
+        .then((user) => {
             res.json({
-                updateResponse: users
+                updateResponse: user
             })
         })
-        
+
         .catch(err => internalServerError(res, err))
 }
 
@@ -139,10 +141,10 @@ const login = async (req: Request, res: Response) => {
 
     {  //Empty field validation
         if (!req.body.name)
-            return badrequest(res, "invalid user")
+            return badrequest(res, "invalid name")
 
         if (!req.body.password)
-            return badrequest(res, "invalid name")
+            return badrequest(res, "invalid password")
     }
     //Calling the login function from model
     await userModel.login(req.body)

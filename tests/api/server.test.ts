@@ -3,11 +3,11 @@ import supertest from "supertest"
 
 const request = supertest(app)
 
-describe("", () => {
-    it("", async () => {
+it("must listen at http://localhost:3002", async () => {
 
-        const response = await request.get("/")
+    const response = await request
+        .get("/")
 
-        expect(response.status).toBe(200)
-    })
+    expect(response.status).toBe(200)
+    
 })

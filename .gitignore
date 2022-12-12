@@ -2,6 +2,6 @@
 /build
 /coverage
 .env
-/dbapi2.db
-/dbapi2.sqbpro
+dbapi2.db
+dbapi2.sqbpro
 /dbtest.db
