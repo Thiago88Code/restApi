@@ -11,10 +11,11 @@ describe("userController.insertUser()", () => {
                 password: "PasswordTest",
                 logged: 1
             })
+            
 
         expect(response.status).toBe(201)
         expect(response.body).toHaveProperty('user')
-        console.log(response.body.name)
+        console.log(response.body)
     
     })
 
