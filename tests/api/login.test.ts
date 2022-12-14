@@ -1,19 +1,15 @@
 import { app } from "../../src/server/server"
 import request from "supertest"
 import jwt from "jsonwebtoken"
+import { User } from "../../src/models/users"
 
-let user: any
+let user: User
 let token: string
 
 beforeAll(async () => {
     const response = await request(app)
         .post("/api/v1/user")
-        .send({
-            id: 1,
-            name: "NameTest",
-            password: "PasswordTest",
-            logged: 1
-        })
+        .send(user)
 
     user = { ...response.body.user }
 
@@ -26,8 +22,8 @@ it("Should be able to log in a user", async () => {
         .send({
             "id": user.id,
             "name": user.name,
-            "password": "PasswordTest",
-            "logged": user.logged
+            "password": "PasswordTest"
+            
         })
 
     expect(response.status).toBe(200)
@@ -42,10 +38,9 @@ it("Should NOT be able to log in with an empty user", async () => {
     const response = await request(app)
         .post("/api/v1/user/login")
         .send({
-            "id": 1,
+            "id": user.id,
             "name": "",
-            "password": "",
-            "logged": 1
+            "password": ""
         })
 
     expect(response.status).toBe(400)

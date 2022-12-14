@@ -12,7 +12,7 @@ export const openConnection = () => {
     
 }
 
-export const dbQuery = async (query: string, params: any[]) => {
+export const dbQuery = async (query: string, params: any[]) : Promise<any[]>=> {
     let db = openConnection();
     try {
         return await new Promise<any[]>((resolve, reject) => {
@@ -23,6 +23,7 @@ export const dbQuery = async (query: string, params: any[]) => {
                     resolve(rows);
             });
         });
+        
     } finally {
         db.close();
     }

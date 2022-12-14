@@ -1,15 +1,10 @@
 import { Request, Response } from "express"
-import { userModel } from "../models/users";
+import { CreateUser, userModel } from "../models/users";
 import { badrequest, internalServerError } from "../services/util";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
 
-interface IUser {
-    id: number
-    name: string
-    password: string
-}
 
 const insertUser = async (req: Request, res: Response) => {
 
@@ -28,11 +23,10 @@ const insertUser = async (req: Request, res: Response) => {
     //generating password hash
     let bcryptPassword = await bcrypt.hash(req.body.password, 10)
 
-    let body = req.body
+    let body: CreateUser = req.body
 
     //assigning password hash to req.body
     body = {
-        id: req.body.id,
         name: req.body.name,
         password: bcryptPassword
 
@@ -88,7 +82,7 @@ const deleteUser = (req: Request, res: Response) => {
         .catch(err => internalServerError(res, err))
 }
 
-const updateUser = async (req: Request<{}, {}, IUser>, res: Response) => {
+const updateUser = async (req: Request, res: Response) => {
 
     //Verifing if the id comes inside req.param
     //const id = parseInt(req.params.id);

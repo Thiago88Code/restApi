@@ -6,9 +6,14 @@ export type User = {
     password: string
 }
 
-const insertUser = async (user: User) => {
-    await dbQuery('INSERT INTO users (name, password) VALUES(?,?)', [user.name, user.password])
-    const response = await dbQuery(`SELECT * FROM users WHERE name = ? AND password = ?`, [user.name, user.password])
+export type CreateUser = {
+    name: string
+    password: string
+}
+
+const insertUser = async (createUser: CreateUser) => {
+    await dbQuery('INSERT INTO users (name, password) VALUES(?,?)', [createUser.name, createUser.password])
+    const response = await dbQuery(`SELECT * FROM users WHERE name = ? AND password = ?`, [createUser.name, createUser.password])
     return response[0];
 
 }
