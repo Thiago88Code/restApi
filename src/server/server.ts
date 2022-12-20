@@ -15,7 +15,6 @@ app.use(express.static(__dirname + '/public'));
 
 app.get('/', (req, res) => {
     res.json({ msg: "ok" })
-    
 })
 
-export {app}
+export { app }

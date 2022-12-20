@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "nodemon --watch \"src/**\" --ext \"ts,json\" --exec \"ts-node ./build/index.js",
     "build": "tsc",
-    "test": "jest",
-    "secure-mode": "jest --watch"
+    "test": "jest --no-cache --detectOpenHandles",
+    "secure-mode": "jest  --no-cache --watch"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +15,8 @@
   "devDependencies": {
     "@types/node": "^18.11.9",
     "@types/supertest": "^2.0.12",
+    "ajv": "8.11.2",
+    "jest-puppeteer": "^6.2.0",
     "nodemon": "^2.0.20",
     "supertest": "^6.3.2",
     "typescript": "^4.9.3"
@@ -31,9 +33,9 @@
     "body-parser": "^1.20.1",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "express-session": "^1.17.3",
     "jest": "^29.3.1",
     "jsonwebtoken": "^8.5.1",
+    "puppeteer": "^19.4.1",
     "sqlite3": "^5.1.2",
     "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1"

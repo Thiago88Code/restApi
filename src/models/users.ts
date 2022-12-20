@@ -65,8 +65,16 @@ const getProfile = async (user: User) => {
         const response = await dbQuery(`SELECT * FROM users WHERE id = ?`, [user.id])
         return response as User[];
     }
+}
+
+const findOne = async (user: User) => {
+    const response = await dbQuery('SELECT id FROM blacklist WHERE id = ?', [user.id])
+    //const response = await dbQuery('INSERT INTO blacklist (userId, token) VALUES(?,?)', [userId, token])
+    return response[0].id;
 
 }
+    
+
 
 export const userModel = {
     insertUser,
@@ -77,5 +85,6 @@ export const userModel = {
     login,
     logout,
     getProfile,
-    insertToken
+    insertToken,
+    findOne
 }

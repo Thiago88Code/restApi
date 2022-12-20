@@ -1,51 +1,82 @@
 import { app } from "../../src/server/server"
 import request from "supertest"
 import jwt from "jsonwebtoken"
-import { User } from "../../src/models/users"
+import { CreateUser, User } from "../../src/models/users"
 
 let user: User
+let createUser: CreateUser
 let token: string
 
 beforeAll(async () => {
     const response = await request(app)
         .post("/api/v1/user")
-        .send(user)
+        .send(createUser = {
+            name: "loginNameTest",
+            password: "loginPasswordTest"
+        })
 
     user = { ...response.body.user }
-
 })
 
-it("Should be able to log in a user", async () => {
+it("Should be able to log in a user. Expect to receive a token then log in", async () => {
 
     const response = await request(app)
         .post("/api/v1/user/login")
-        .send({
+        .send(user = {
             "id": user.id,
             "name": user.name,
-            "password": "PasswordTest"
-            
+            "password": "loginPasswordTest"
         })
 
+    token = response.body.token
     expect(response.status).toBe(200)
+    expect(token.length).toBeGreaterThan(0)
     console.log(response.body.user)
     console.log(response.body.token)
-    token = response.body.token
-
 })
 
 it("Should NOT be able to log in with an empty user", async () => {
 
     const response = await request(app)
         .post("/api/v1/user/login")
-        .send({
+        .send(user = {
             "id": user.id,
             "name": "",
-            "password": ""
+            "password": "loginPasswordTest"
         })
 
     expect(response.status).toBe(400)
 
 })
+
+it("Should NOT to be able to log in with wrong name", async () => {
+
+    const response = await request(app)
+        .post("/api/v1/user/login")
+        .send(user = {
+            "id": user.id,
+            "name": "wrong_name",
+            "password": user.password
+        })
+
+    expect(response.status).toBe(500)
+
+})
+
+it("Should NOT to be able to log in with wrong password", async () => {
+
+    const response = await request(app)
+        .post("/api/v1/user/login")
+        .send(user = {
+            "id": user.id,
+            "name": user.name,
+            "password": "wrong_password"
+        })
+
+    expect(response.status).toBe(500)
+
+})
+
 
 it("Should be able to get the User profile", async () => {
 
@@ -67,6 +98,14 @@ it("Should be able to get the User profile", async () => {
 
 })
 
+
+/*it("Should not be accessed a protected route without token", async () => {
+   const response = await request(app)
+   .get('/api/v1/user')
+   expect(response.status).toBe(401)
+
+})*/
+
 it("Should be able to logout an user", async () => {
     const response = await request(app)
         .delete(`/api/v1/user/logout/${user.id}`)
@@ -74,7 +113,6 @@ it("Should be able to logout an user", async () => {
     expect(response.status).toBe(200)
     expect(response.body).toHaveProperty('res')
     console.log(response.body)
-
 
 })
 

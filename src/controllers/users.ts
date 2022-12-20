@@ -1,9 +1,8 @@
 import { Request, Response } from "express"
-import { CreateUser, userModel } from "../models/users";
+import { CreateUser, User, userModel } from "../models/users";
 import { badrequest, internalServerError } from "../services/util";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-
 
 
 const insertUser = async (req: Request, res: Response) => {
@@ -66,6 +65,7 @@ const getUser = (req: Request, res: Response) => {
             })
         })
         .catch(err => internalServerError(res, err))
+
 }
 
 const deleteUser = (req: Request, res: Response) => {
@@ -84,25 +84,22 @@ const deleteUser = (req: Request, res: Response) => {
 
 const updateUser = async (req: Request, res: Response) => {
 
-    //Verifing if the id comes inside req.param
-    //const id = parseInt(req.params.id);
+    //Empty field validation
+    const user = req.body;
+    if (!user)
+        return badrequest(res, "invalid user")
 
-    {   //Empty field validation
-        const user = req.body;
-        if (!user)
-            return badrequest(res, "invalid user")
+    if (!user.name)
+        return badrequest(res, "invalid name")
 
-        if (!user.name)
-            return badrequest(res, "invalid name")
+    if (!user.password)
+        return badrequest(res, "invalid password")
 
-        if (!user.password)
-            return badrequest(res, "invalid password")
 
-    }
     //generating password hash
     let bcryptPassword = await bcrypt.hash(req.body.password, 10)
 
-    let body = req.body
+    let body: User = req.body
 
     //assigning password hash to req.body
     body = {
@@ -146,9 +143,13 @@ const login = async (req: Request, res: Response) => {
             if (!checkPass) {
                 return badrequest(res, "invalid password");
             }
+            const payload = {
+                id: user.id
+            }
             //Generating token
-            const token = jwt.sign({ id: req.body.id }, process.env.JWT_PASS ?? "", { expiresIn: '8h' });
+            const token = jwt.sign({ id: payload }, process.env.JWT_PASS ?? "", { expiresIn: '8h' });
             //Saving the token in the blacklist
+
             userModel.insertToken(req.body.id, token)
             res.json({
                 user,
